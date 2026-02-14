@@ -23,7 +23,7 @@ const projects = [...new Set(privateDrawings.map(d => d.data.project))];
         <button type="submit" class="btn btn-primary">Enter</button>
       </form>
       <p id="password-error" class="error" hidden>Incorrect password. Please try again.</p>
-      <a href="/" class="back-link">&larr; Back to portfolio</a>
+      <a href={import.meta.env.BASE_URL} class="back-link">&larr; Back to portfolio</a>
     </div>
   </div>
 

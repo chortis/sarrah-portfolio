@@ -1,10 +1,11 @@
 ---
+const base = import.meta.env.BASE_URL;
 ---
 
 <header id="site-header">
   <div class="header-inner">
     <div class="logo-group">
-      <a href="/" class="logo">Sarrah Campbell</a>
+      <a href={base} class="logo">Sarrah Campbell</a>
       <span class="logo-sub">Senior Storyboard Artist</span>
     </div>
 
@@ -14,10 +15,10 @@
 
     <nav id="main-nav">
       <button class="nav-close" id="nav-close" aria-label="Close menu">&times;</button>
-      <a href="/" class="nav-link">Portfolio</a>
-      <a href="/private" class="nav-link">Client Work</a>
-      <a href="/about" class="nav-link">About</a>
-      <a href="/resume" class="nav-link">CV</a>
+      <a href={base} class="nav-link">Portfolio</a>
+      <a href={`${base}private`} class="nav-link">Client Work</a>
+      <a href={`${base}about`} class="nav-link">About</a>
+      <a href={`${base}resume`} class="nav-link">CV</a>
       <div class="nav-socials social-links">
         <a href="https://instagram.com/sarrahsketchbook" target="_blank" rel="noopener" aria-label="Instagram">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
