@@ -1,0 +1,33 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<BaseLayout title="Sarrah Campbell — About">
+  <Header />
+
+  <main>
+    <section class="section about-content">
+      <div class="about-layout">
+        <div class="about-photo-wrap">
+          <img
+            class="about-photo"
+            src="https://res.cloudinary.com/dbozy2cc7/image/upload/v1771110802/sarrah-folio/about-photo.webp"
+            alt="Sarrah Campbell"
+          />
+        </div>
+        <div class="about-text">
+          <h2 class="heading">About</h2>
+          <p>Hi! I am a <strong>Senior Storyboard Artist</strong> based in Vancouver, B.C.</p>
+          <p>I am a 2016 graduate of the <strong>2D Animation and Visual Development program at Capilano University.</strong></p>
+          <p>I love working on comedies, dramatic acting, and everything in between!</p>
+          <p>I am currently looking for new opportunities — let's be friends!</p>
+          <a href="mailto:sarrahecampbell@gmail.com" class="about-cta">Get in touch &rarr;</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</BaseLayout>

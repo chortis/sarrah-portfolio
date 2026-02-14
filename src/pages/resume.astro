@@ -1,0 +1,370 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<BaseLayout title="Sarrah Campbell — Resume">
+  <Header />
+  <main class="resume">
+    <header class="resume-header print-only">
+      <div class="resume-header-left">
+        <h1>Sarrah Campbell</h1>
+        <p class="resume-subtitle">Storyboard Artist</p>
+      </div>
+      <div class="resume-contact">
+        <a href="https://sarrahcampbell.com">sarrahcampbell.com</a>
+        <a href="mailto:sarrahecampbell@gmail.com">sarrahecampbell@gmail.com</a>
+      </div>
+    </header>
+
+    <section class="resume-section">
+      <h2 class="resume-heading">Experience</h2>
+
+      <div class="resume-entry">
+        <div class="resume-entry-header">
+          <h3>Senior 3D Storyboard Artist</h3>
+          <span class="resume-date">Mar 2024 – Aug 2024</span>
+        </div>
+        <p class="resume-studio">Atomic Cartoons</p>
+        <p class="resume-details"><em>Iron Man and His Awesome Friends</em> — 3D Storyboarding on shorts</p>
+      </div>
+
+      <div class="resume-entry">
+        <div class="resume-entry-header">
+          <h3>Senior 3D Storyboard Artist</h3>
+          <span class="resume-date">Oct 2023 – Dec 2023</span>
+        </div>
+        <p class="resume-studio">Kickstart Entertainment</p>
+        <p class="resume-details"><em>Hot Wheels Monster Trucks Power Smashers</em> — 3D Storyboarding</p>
+      </div>
+
+      <div class="resume-entry">
+        <div class="resume-entry-header">
+          <h3>2D + 3D Storyboard Artist</h3>
+          <span class="resume-date">Feb 2020 – Aug 2023</span>
+        </div>
+        <p class="resume-studio">Bardel Entertainment</p>
+        <p class="resume-details">
+          <em>Diary of a Wimpy Kid 3</em> — 3D Storyboarding<br/>
+          <em>King of Meat</em> — 2D Storyboarding<br/>
+          <em>Super Kitties</em> — 3D Storyboarding<br/>
+          <em>Diary of a Wimpy Kid 2</em> — 3D Storyboarding<br/>
+          <em>Diary of a Wimpy Kid</em> — 3D Storyboarding
+        </p>
+      </div>
+
+      <div class="resume-entry">
+        <div class="resume-entry-header">
+          <h3>3D Storyboard Artist / Revisionist</h3>
+          <span class="resume-date">Nov 2019 – Feb 2020</span>
+        </div>
+        <p class="resume-studio">Atomic Cartoons</p>
+        <p class="resume-details">
+          <em>Lego Star Wars Christmas Special</em> — Storyboarding, Clean up, Revisions<br/>
+          <em>Lego Marvel Avengers Special</em> — Storyboarding, Clean up, Revisions
+        </p>
+      </div>
+
+      <div class="resume-entry">
+        <div class="resume-entry-header">
+          <h3>2D + 3D Storyboard Revisionist</h3>
+          <span class="resume-date">Nov 2017 – Oct 2019</span>
+        </div>
+        <p class="resume-studio">Kickstart Entertainment</p>
+        <p class="resume-details">
+          <em>Hatchimals</em> — Re-Boarding, Revisions, Clean up<br/>
+          <em>Starbeam</em> — Clean up, Revisions, and Re-Boarding<br/>
+          <em>Enchantimals</em> — Revisions, light Re-boarding, a bit of design
+        </p>
+      </div>
+
+      <div class="resume-entry">
+        <div class="resume-entry-header">
+          <h3>3D Jr. Storyboard Artist</h3>
+          <span class="resume-date">Oct 2016 – Mar 2017</span>
+        </div>
+        <p class="resume-studio">Rainmaker Entertainment</p>
+        <p class="resume-details"><em>Barbie Dolphin Magic</em> — Beatboards, Storyboards, Revisions</p>
+      </div>
+    </section>
+
+    <section class="resume-section">
+      <h2 class="resume-heading">Education</h2>
+      <div class="resume-entry">
+        <div class="resume-entry-header">
+          <h3>2D Animation Program</h3>
+          <span class="resume-date">2016</span>
+        </div>
+        <p class="resume-studio">Capilano University</p>
+        <p class="resume-details">Traditional Animation, Harmony, Flash, BGs, Character Design, Storytelling</p>
+      </div>
+    </section>
+
+    <div class="resume-actions no-print">
+      <button onclick="window.print()" class="btn">Print / Save as PDF</button>
+    </div>
+  </main>
+  <Footer />
+</BaseLayout>
+
+<style>
+  .resume {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 3rem 2rem 4rem;
+  }
+
+  .resume-header {
+    position: static;
+    background: none;
+    backdrop-filter: none;
+    border: none;
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+  }
+
+  /* Hidden on screen, visible only in print */
+  .print-only {
+    display: none;
+  }
+
+  .resume-header h1 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 1.8rem;
+    color: var(--heading-color);
+    margin-bottom: 0.1rem;
+  }
+
+  .resume-subtitle {
+    font-size: 1rem;
+    color: var(--gold);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+    margin-bottom: 0.2rem;
+  }
+
+  .resume-contact {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+  }
+
+  .resume-section {
+    margin-bottom: 2rem;
+  }
+
+  .resume-heading {
+    font-family: Georgia, "Times New Roman", serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 1.4rem;
+    color: var(--heading-color);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.4rem;
+    margin-bottom: 1rem;
+  }
+
+  .resume-entry {
+    margin-bottom: 1.25rem;
+  }
+
+  .resume-entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+  }
+
+  .resume-entry-header h3 {
+    font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .resume-date {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .resume-studio {
+    font-size: 0.95rem;
+    color: var(--gold);
+    margin-top: 0.1rem;
+  }
+
+  .resume-details {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-top: 0.15rem;
+  }
+
+  .resume-skills {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .resume-skills li {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 0.35rem 0.85rem;
+    font-size: 0.85rem;
+    font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+    color: var(--text);
+  }
+
+  .resume-actions {
+    margin-top: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  /* Print styles */
+  @media print {
+    .no-print {
+      display: none !important;
+    }
+
+    .print-only {
+      display: block !important;
+    }
+
+    /* Hide site header/footer chrome in print */
+    :global(#site-header),
+    :global(footer) {
+      display: none !important;
+    }
+
+    body {
+      padding-top: 0 !important;
+      background: #fff !important;
+      color: #222 !important;
+    }
+
+    .resume {
+      padding: 0;
+      max-width: 100%;
+    }
+
+    .resume-header {
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: center;
+      margin-bottom: 0.6rem;
+      padding-bottom: 0;
+      border-bottom: none;
+      text-align: left;
+    }
+
+    .resume-header-left {
+      text-align: left;
+    }
+
+    .resume-contact {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.05rem;
+      margin-top: 0;
+    }
+
+    .resume-header h1 {
+      color: #222;
+      font-size: 1.7rem;
+      margin-bottom: 0;
+      line-height: 1;
+      margin-top: 0;
+    }
+
+    .resume-subtitle {
+      color: #555;
+      font-size: 0.9rem;
+      margin-bottom: 0;
+      line-height: 1.2;
+    }
+
+    .resume-contact,
+    .resume-contact a {
+      color: #555;
+      text-decoration: none;
+      font-size: 0.65rem;
+      letter-spacing: 0.02em;
+    }
+
+    .resume-section {
+      margin-bottom: 1.4rem;
+    }
+
+    .resume-heading {
+      color: #222;
+      border-bottom-color: #ccc;
+      font-size: 1rem;
+      padding-bottom: 0.2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .resume-entry {
+      margin-bottom: 0.6rem;
+    }
+
+    .resume-entry-header h3 {
+      color: #222;
+      font-size: 0.9rem;
+    }
+
+    .resume-date {
+      color: #555;
+      font-size: 0.75rem;
+    }
+
+    .resume-details {
+      color: #555;
+      font-size: 0.8rem;
+    }
+
+    .resume-studio {
+      color: #444;
+      font-size: 0.8rem;
+    }
+
+    .resume-skills {
+      gap: 0.3rem;
+    }
+
+    .resume-skills li {
+      background: none;
+      border-color: #ccc;
+      color: #222;
+      padding: 0.2rem 0.6rem;
+      font-size: 0.8rem;
+    }
+
+    @page {
+      margin: 1.5cm;
+    }
+  }
+
+  @media (max-width: 500px) {
+    .resume {
+      padding: 2rem 1.25rem 3rem;
+    }
+
+    .resume-entry-header {
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .resume-actions {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>

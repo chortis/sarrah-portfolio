@@ -1,0 +1,21 @@
+---
+export interface Props {
+  title: string;
+  description: string;
+  video: string;
+  poster?: string;
+}
+
+const { title, description, video, poster } = Astro.props;
+---
+
+<article class="board-card">
+  <div class="video-wrap">
+    <video controls preload="metadata" poster={poster || ''}>
+      <source src={video} type="video/mp4">
+      Your browser does not support video.
+    </video>
+  </div>
+  <h3 class="heading">{title}</h3>
+  <p>{description}</p>
+</article>

@@ -1,0 +1,703 @@
+/* ============================
+   CSS Custom Properties
+   ============================ */
+
+:root {
+  --accent: #6b4c7a;
+  --accent-hover: #7d5e8f;
+  --accent-glow: rgba(107, 76, 122, 0.18);
+  --gold: #b0789a;
+  --gold-hover: #c48aab;
+  --radius: 0;
+  --max-width: 1400px;
+  --transition: 0.2s ease;
+}
+
+[data-theme="dark"] {
+  --bg: #1a1018;
+  --bg-card: #241a23;
+  --text: #f2edf0;
+  --text-muted: #a99bab;
+  --border: #3a2d39;
+  --header-bg: rgba(26, 16, 24, 0.88);
+  --btn-border: var(--gold);
+  --btn-text: var(--gold);
+  --btn-hover-bg: var(--gold);
+  --btn-hover-text: #1a1018;
+  --link-color: var(--gold);
+  --heading-color: #f2edf0;
+}
+
+[data-theme="light"] {
+  --bg: #fdf5f8;
+  --bg-card: #fff9fb;
+  --text: #3d2b3a;
+  --text-muted: #7a6478;
+  --border: #ecdce6;
+  --header-bg: rgba(253, 245, 248, 0.88);
+  --btn-border: var(--accent);
+  --btn-text: var(--accent);
+  --btn-hover-bg: var(--accent);
+  --btn-hover-text: #fff;
+  --link-color: var(--accent);
+  --heading-color: var(--accent);
+}
+
+/* ============================
+   Reset & Base
+   ============================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 18px;
+}
+
+body {
+  font-family: Georgia, "Times New Roman", serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  transition: background var(--transition), color var(--transition);
+  min-height: 100vh;
+  padding-top: 4.5rem;
+}
+
+a {
+  color: var(--link-color);
+  text-decoration: none;
+}
+
+a:hover,
+a:focus-visible {
+  color: var(--gold-hover);
+}
+
+img, video {
+  max-width: 100%;
+  display: block;
+}
+
+/* ============================
+   Header — fixed, hide on scroll
+   ============================ */
+
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: var(--header-bg);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  transition: transform 0.3s ease;
+}
+
+header.header-hidden {
+  transform: translateY(-100%);
+}
+
+.header-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.logo {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.4rem;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--text);
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+}
+
+.logo:hover {
+  color: var(--gold);
+}
+
+.logo-sub {
+  font-size: 0.8rem;
+  color: var(--gold);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  font-weight: 400;
+}
+
+nav {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.nav-close {
+  display: none;
+}
+
+.nav-socials {
+  gap: 0.75rem;
+  margin-left: 0.5rem;
+  padding-left: 1rem;
+  border-left: 1px solid var(--border);
+}
+
+.nav-link {
+  font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  transition: color var(--transition);
+}
+
+.nav-link:hover,
+.nav-link:focus-visible {
+  color: var(--gold);
+}
+
+/* ============================
+   Shared Section Container
+   ============================ */
+
+.section {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 4rem 1.5rem;
+}
+
+/* ============================
+   Shared Heading Style
+   ============================ */
+
+.heading {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--heading-color);
+}
+
+/* ============================
+   Shared Social Links
+   ============================ */
+
+.social-links {
+  display: flex;
+  align-items: center;
+}
+
+.social-links a {
+  color: var(--text-muted);
+  transition: color var(--transition);
+}
+
+.social-links a:hover {
+  color: var(--gold);
+}
+
+/* ============================
+   Drawings / Gallery Section
+   ============================ */
+
+.drawings {
+  padding-top: 2rem;
+}
+
+.drawings h2 {
+  font-size: 1.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.project-description {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 0;
+}
+
+.project-drawings {
+  margin-bottom: 3rem;
+}
+
+.project-drawings .gallery-grid {
+  padding-top: 1.5rem;
+}
+
+.gallery-grid {
+  columns: 3;
+  column-gap: 1.5rem;
+}
+
+.gallery-item {
+  break-inside: avoid;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.gallery-item.full {
+  column-span: all;
+}
+
+.img-wrap {
+  overflow: hidden;
+}
+
+.img-wrap img {
+  width: 100%;
+  display: block;
+}
+
+.img-wrap svg {
+  width: 100%;
+  display: block;
+}
+
+/* ============================
+   Theme Toggle
+   ============================ */
+
+.theme-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.15rem;
+  color: var(--text-muted);
+  transition: border-color var(--transition), color var(--transition);
+}
+
+.theme-btn:hover {
+  border-color: var(--accent);
+  color: var(--gold);
+}
+
+[data-theme="dark"] .icon-sun { display: flex; }
+[data-theme="dark"] .icon-moon { display: none; }
+[data-theme="light"] .icon-sun { display: none; }
+[data-theme="light"] .icon-moon { display: flex; }
+
+/* ============================
+   Buttons
+   ============================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background: transparent;
+  color: var(--btn-text);
+  border: 1.5px solid var(--btn-border);
+  cursor: pointer;
+  transition: background var(--transition), box-shadow var(--transition), color var(--transition);
+}
+
+.btn:hover,
+.btn:focus-visible {
+  background: var(--btn-hover-bg);
+  color: var(--btn-hover-text);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.btn-primary:hover,
+.btn-primary:focus-visible {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+  color: #fff;
+}
+
+/* ============================
+   Work Section
+   ============================ */
+
+.work {
+  padding-top: 5rem;
+}
+
+.work h2 {
+  font-size: 1.75rem;
+}
+
+.board-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+/* ============================
+   Board Card
+   ============================ */
+
+.board-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.board-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 24px var(--accent-glow);
+}
+
+.video-wrap {
+  aspect-ratio: 16 / 9;
+  background: #000;
+}
+
+.video-wrap video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.board-card h3 {
+  font-size: 1.3rem;
+  padding: 1.25rem 1.25rem 0.25rem;
+}
+
+.board-card p {
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  padding: 0 1.25rem 1.25rem;
+  line-height: 1.5;
+}
+
+/* ============================
+   Password Gate
+   ============================ */
+
+.password-gate {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 1.5rem;
+}
+
+.password-box {
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+}
+
+.password-box h2 {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.password-box p {
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+  font-size: 1.05rem;
+}
+
+.password-box form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.password-box form input {
+  width: 100%;
+}
+
+.password-box form .btn {
+  width: auto;
+}
+
+.password-box input {
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text);
+  font-size: 1.1rem;
+  text-align: left;
+  outline: none;
+  transition: border-color var(--transition);
+}
+
+.password-box input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+
+.error {
+  color: #ef4444;
+  font-size: 0.95rem;
+  margin-top: 0.5rem;
+}
+
+.back-link {
+  display: inline-block;
+  margin-top: 1.5rem;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.back-link:hover {
+  color: var(--accent);
+}
+
+/* ============================
+   About Page
+   ============================ */
+
+.about-content {
+  padding: 4rem 3rem 6rem;
+}
+
+.about-layout {
+  display: grid;
+  grid-template-columns: 0.7fr 1.3fr;
+  gap: 3.5rem;
+  align-items: center;
+}
+
+.about-photo-wrap {
+  overflow: hidden;
+  max-width: 320px;
+}
+
+.about-photo {
+  display: block;
+  width: 100%;
+}
+
+.about-text h2 {
+  font-size: 1.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.about-text p {
+  font-size: 1.1rem;
+  margin-bottom: 0.85rem;
+  line-height: 1.7;
+}
+
+.about-text strong {
+  color: var(--gold);
+}
+
+.about-cta {
+  display: inline-block;
+  margin-top: 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--gold);
+  letter-spacing: 0.02em;
+  transition: color var(--transition);
+}
+
+.about-cta:hover {
+  color: var(--gold-hover);
+}
+
+@media (max-width: 700px) {
+  .about-layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+/* ============================
+   Footer
+   ============================ */
+
+footer {
+  text-align: center;
+  padding: 2rem 1.5rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.footer-socials {
+  gap: 1rem;
+}
+
+/* ============================
+   Hamburger Toggle
+   ============================ */
+
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  z-index: 200;
+}
+
+.menu-toggle span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--text);
+}
+
+/* ============================
+   Responsive
+   ============================ */
+
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: flex;
+  }
+
+  nav {
+    display: none;
+  }
+
+  .nav-close {
+    display: block;
+    position: absolute;
+    top: 1.25rem;
+    right: 1.5rem;
+    background: none;
+    border: none;
+    color: var(--text);
+    font-size: 2rem;
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  body.nav-open {
+    overflow: hidden;
+  }
+
+  body.nav-open header {
+    backdrop-filter: none;
+    background: #f5dce8;
+    border-bottom-color: transparent;
+  }
+
+  [data-theme="dark"] body.nav-open header {
+    background: var(--bg);
+  }
+
+  body.nav-open nav {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #f5dce8;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 2rem;
+    z-index: 200;
+  }
+
+  [data-theme="dark"] body.nav-open nav {
+    background: var(--bg);
+  }
+
+  body.nav-open .nav-link {
+    font-size: 1.8rem;
+    letter-spacing: 0.06em;
+  }
+
+  body.nav-open .nav-socials {
+    margin-left: 0;
+    padding-left: 0;
+    border-left: none;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 1rem;
+  }
+
+  body.nav-open .nav-socials a svg {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+@media (min-width: 700px) {
+  .board-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .gallery-grid {
+    columns: 3;
+  }
+}
+
+@media (max-width: 500px) {
+  html {
+    font-size: 16px;
+  }
+
+  .gallery-grid {
+    columns: 1;
+  }
+}
+
+/* ============================
+   Focus styles for accessibility
+   ============================ */
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ============================
+   Hidden utility
+   ============================ */
+
+[hidden] {
+  display: none !important;
+}
+
+/* ============================
+   Print: hide site chrome
+   ============================ */
+
+@media print {
+  #site-header,
+  footer {
+    display: none !important;
+  }
+}

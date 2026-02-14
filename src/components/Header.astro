@@ -1,0 +1,68 @@
+---
+---
+
+<header id="site-header">
+  <div class="header-inner">
+    <div class="logo-group">
+      <a href="/" class="logo">Sarrah Campbell</a>
+      <span class="logo-sub">Senior Storyboard Artist</span>
+    </div>
+
+    <button class="menu-toggle" id="menu-toggle" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+
+    <nav id="main-nav">
+      <button class="nav-close" id="nav-close" aria-label="Close menu">&times;</button>
+      <a href="/" class="nav-link">Portfolio</a>
+      <a href="/private" class="nav-link">Client Work</a>
+      <a href="/about" class="nav-link">About</a>
+      <a href="/resume" class="nav-link">CV</a>
+      <div class="nav-socials social-links">
+        <a href="https://instagram.com/sarrahsketchbook" target="_blank" rel="noopener" aria-label="Instagram">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        </a>
+        <a href="mailto:sarrahecampbell@gmail.com" aria-label="Email">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        </a>
+        <a href="https://ca.linkedin.com/in/sarrah-campbell-8b175039" target="_blank" rel="noopener" aria-label="LinkedIn">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        </a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<script>
+  // Header scroll hide
+  const header = document.getElementById('site-header');
+  if (header) {
+    let lastY = window.scrollY;
+    window.addEventListener('scroll', () => {
+      if (document.body.classList.contains('nav-open')) return;
+      const y = window.scrollY;
+      if (y - lastY > 5 && y > 80) header.classList.add('header-hidden');
+      else if (lastY - y > 5) header.classList.remove('header-hidden');
+      lastY = y;
+    }, { passive: true });
+  }
+
+  // Mobile menu open/close
+  const openBtn = document.getElementById('menu-toggle')!;
+  const closeBtn = document.getElementById('nav-close')!;
+
+  openBtn.addEventListener('click', () => {
+    document.body.classList.add('nav-open');
+    header!.classList.remove('header-hidden');
+  });
+
+  closeBtn.addEventListener('click', () => {
+    document.body.classList.remove('nav-open');
+  });
+
+  document.querySelectorAll('#main-nav .nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+      document.body.classList.remove('nav-open');
+    });
+  });
+</script>

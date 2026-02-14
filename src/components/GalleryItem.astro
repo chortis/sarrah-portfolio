@@ -1,0 +1,15 @@
+---
+export interface Props {
+  alt: string;
+  image: string;
+  full?: boolean;
+}
+
+const { alt, image, full = false } = Astro.props;
+---
+
+<figure class:list={['gallery-item', { full }]}>
+  <div class="img-wrap" aria-label={alt}>
+    <img src={image} alt={alt} />
+  </div>
+</figure>

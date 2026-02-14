@@ -1,0 +1,44 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import BoardCard from '../components/BoardCard.astro';
+import GalleryItem from '../components/GalleryItem.astro';
+import { getCollection } from 'astro:content';
+
+const portfolio = (await getCollection('portfolio')).sort((a, b) => a.data.order - b.data.order);
+const drawings = (await getCollection('drawings')).sort((a, b) => a.data.order - b.data.order);
+---
+
+<BaseLayout>
+  <Header />
+
+  <main>
+    <section class="section work" id="work">
+      <div class="board-grid">
+        {portfolio.map((item) => (
+          <BoardCard
+            title={item.data.title}
+            description={item.data.description}
+            video={item.data.video}
+            poster={item.data.poster}
+          />
+        ))}
+      </div>
+    </section>
+
+    <section class="section drawings" id="drawings">
+      <div class="gallery-grid">
+        {drawings.map((item) => (
+          <GalleryItem
+            alt={item.data.alt}
+            image={item.data.image}
+            full={item.data.full}
+          />
+        ))}
+      </div>
+    </section>
+  </main>
+
+  <Footer />
+</BaseLayout>
