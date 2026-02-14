@@ -9,4 +9,7 @@ dist/
 .env.*
 
 # astro
-.astro/.DS_Store
+.astro/
+
+# OS
+.DS_Store
