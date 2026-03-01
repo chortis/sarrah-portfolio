@@ -30,6 +30,16 @@ jobs:
         env:
           PUBLIC_PASSWORD_HASH: ${{ secrets.PUBLIC_PASSWORD_HASH }}
 
+      - run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright tests
+        run: |
+          npm run preview &
+          npx wait-on http://localhost:4321/sarrah-portfolio/ --timeout 30000
+          npx playwright test
+        env:
+          TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
