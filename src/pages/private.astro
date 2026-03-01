@@ -6,6 +6,8 @@ import BoardCard from '../components/BoardCard.astro';
 import GalleryItem from '../components/GalleryItem.astro';
 import { getCollection } from 'astro:content';
 
+const passwordEnabled = import.meta.env.PUBLIC_CLIENT_WORK_PASSWORD_ENABLED === 'true';
+
 const privateWork = (await getCollection('private')).sort((a, b) => a.data.order - b.data.order);
 const privateDrawings = (await getCollection('private-drawings')).sort((a, b) => a.data.order - b.data.order);
 
@@ -13,22 +15,23 @@ const projects = [...new Set(privateDrawings.map(d => d.data.project))];
 ---
 
 <BaseLayout title="Sarrah Campbell — Private Work">
-  <!-- Password gate -->
-  <div id="password-gate" class="password-gate">
-    <div class="password-box">
-      <h2 class="heading">Client Work</h2>
-      <p>Enter the password to view this content.</p>
-      <form id="password-form">
-        <input type="password" id="password-input" placeholder="Password" autocomplete="off" required />
-        <button type="submit" class="btn btn-primary">Enter</button>
-      </form>
-      <p id="password-error" class="error" hidden>Incorrect password. Please try again.</p>
-      <a href={import.meta.env.BASE_URL} class="back-link">&larr; Back to portfolio</a>
+  {passwordEnabled && (
+    <div id="password-gate" class="password-gate">
+      <div class="password-box">
+        <h2 class="heading">Client Work</h2>
+        <p>Enter the password to view this content.</p>
+        <form id="password-form">
+          <input type="password" id="password-input" placeholder="Password" autocomplete="off" required />
+          <button type="submit" class="btn btn-primary">Enter</button>
+        </form>
+        <p id="password-error" class="error" hidden>Incorrect password. Please try again.</p>
+        <a href={import.meta.env.BASE_URL} class="back-link">&larr; Back to portfolio</a>
+      </div>
     </div>
-  </div>
+  )}
 
   <!-- Protected content -->
-  <div id="protected-content" hidden>
+  <div id="protected-content" hidden={passwordEnabled}>
     <Header />
 
     <main>
@@ -72,38 +75,41 @@ const projects = [...new Set(privateDrawings.map(d => d.data.project))];
   </div>
 
   <script>
-    const PASSWORD_HASH = import.meta.env.PUBLIC_PASSWORD_HASH;
-    const SESSION_KEY = 'sarrah_private_auth';
+    const gate = document.getElementById('password-gate');
+    if (gate) {
+      const PASSWORD_HASH = import.meta.env.PUBLIC_PASSWORD_HASH;
+      const SESSION_KEY = 'sarrah_private_auth';
 
-    async function hashPassword(password: string): Promise<string> {
-      const encoder = new TextEncoder();
-      const data = encoder.encode(password);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-      return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
-    }
-
-    function unlock() {
-      document.getElementById('password-gate')!.hidden = true;
-      document.getElementById('protected-content')!.hidden = false;
-    }
-
-    if (sessionStorage.getItem(SESSION_KEY) === 'true') {
-      unlock();
-    }
-
-    document.getElementById('password-form')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const input = document.getElementById('password-input') as HTMLInputElement;
-      const error = document.getElementById('password-error')!;
-      const hash = await hashPassword(input.value);
-      if (hash === PASSWORD_HASH) {
-        sessionStorage.setItem(SESSION_KEY, 'true');
-        unlock();
-      } else {
-        error.hidden = false;
-        input.value = '';
-        input.focus();
+      async function hashPassword(password: string): Promise<string> {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(password);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
       }
-    });
+
+      function unlock() {
+        document.getElementById('password-gate')!.hidden = true;
+        document.getElementById('protected-content')!.hidden = false;
+      }
+
+      if (sessionStorage.getItem(SESSION_KEY) === 'true') {
+        unlock();
+      }
+
+      document.getElementById('password-form')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const input = document.getElementById('password-input') as HTMLInputElement;
+        const error = document.getElementById('password-error')!;
+        const hash = await hashPassword(input.value);
+        if (hash === PASSWORD_HASH) {
+          sessionStorage.setItem(SESSION_KEY, 'true');
+          unlock();
+        } else {
+          error.hidden = false;
+          input.value = '';
+          input.focus();
+        }
+      });
+    }
   </script>
 </BaseLayout>
