@@ -133,17 +133,15 @@ const descParts: Part[] = youtubeEmbed
         if (p.type === 'text') return <span>{p.value}</span>;
         if (p.type === 'ts') {
           return (
-            <span class="ts-chip">
-              <button type="button" class="timestamp" data-seconds={p.seconds}>{p.value}</button>
-            </span>
+            <button type="button" class="ts-chip timestamp" data-seconds={p.seconds}>{p.value}</button>
           );
         }
         return (
-          <span class="ts-chip">
-            <button type="button" class="timestamp" data-seconds={p.seconds}>{p.start}</button>
+          <button type="button" class="ts-chip timestamp" data-seconds={p.seconds} aria-label={`Jump to ${p.start}`}>
+            <span>{p.start}</span>
             <span class="ts-sep">–</span>
             <span class="ts-end">{p.end}</span>
-          </span>
+          </button>
         );
       })}
     </p>
@@ -298,7 +296,6 @@ const descParts: Part[] = youtubeEmbed
     justify-content: center;
   }
 
-  /* Timestamp chip styles (unchanged) */
   .ts-chip {
     display: inline-flex;
     align-items: baseline;
@@ -329,9 +326,6 @@ const descParts: Part[] = youtubeEmbed
 
   .timestamp {
     background: none;
-    border: none;
-    padding: 0;
-    margin: 0;
     font: inherit;
     color: var(--gold);
     cursor: pointer;
