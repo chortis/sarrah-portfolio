@@ -22,6 +22,7 @@ const drawings = (await getCollection('drawings')).sort((a, b) => a.data.order -
             description={item.data.description}
             video={item.data.video}
             poster={item.data.poster}
+            lock={item.data.lock}
           />
         ))}
       </div>
