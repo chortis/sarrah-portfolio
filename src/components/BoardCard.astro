@@ -4,18 +4,85 @@ export interface Props {
   description: string;
   video: string;
   poster?: string;
+  start?: number;
 }
 
-const { title, description, video, poster } = Astro.props;
+const { title, description, video, poster, start } = Astro.props;
+
+// Detect YouTube URLs and convert to an embeddable form.
+function getYouTubeEmbed(url: string, startSeconds?: number): string | null {
+  try {
+    const u = new URL(url);
+    let id: string | null = null;
+    let urlStart: string | null = null;
+
+    if (u.hostname === 'youtu.be') {
+      id = u.pathname.replace(/^\//, '');
+      urlStart = u.searchParams.get('t') || u.searchParams.get('start');
+    } else if (u.hostname.endsWith('youtube.com') || u.hostname.endsWith('youtube-nocookie.com')) {
+      if (u.pathname === '/watch') {
+        id = u.searchParams.get('v');
+      } else if (u.pathname.startsWith('/embed/')) {
+        id = u.pathname.split('/embed/')[1];
+      } else if (u.pathname.startsWith('/shorts/')) {
+        id = u.pathname.split('/shorts/')[1];
+      }
+      urlStart = u.searchParams.get('t') || u.searchParams.get('start');
+    }
+
+    if (!id) return null;
+
+    // Allow `t=525` or `t=8m45s` style values.
+    let startNum = startSeconds;
+    if (startNum == null && urlStart) {
+      const m = urlStart.match(/^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s?)?$/);
+      if (m) {
+        const h = parseInt(m[1] || '0', 10);
+        const min = parseInt(m[2] || '0', 10);
+        const s = parseInt(m[3] || '0', 10);
+        startNum = h * 3600 + min * 60 + s;
+      }
+    }
+
+    const params = new URLSearchParams({ rel: '0' });
+    if (startNum && startNum > 0) params.set('start', String(startNum));
+    return `https://www.youtube-nocookie.com/embed/${id}?${params.toString()}`;
+  } catch {
+    return null;
+  }
+}
+
+const youtubeEmbed = getYouTubeEmbed(video, start);
 ---
 
 <article class="board-card">
   <div class="video-wrap">
-    <video controls preload="metadata" poster={poster || ''}>
-      <source src={video} type="video/mp4">
-      Your browser does not support video.
-    </video>
+    {youtubeEmbed ? (
+      <iframe
+        src={youtubeEmbed}
+        title={title}
+        loading="lazy"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerpolicy="strict-origin-when-cross-origin"
+        allowfullscreen
+      ></iframe>
+    ) : (
+      <video controls preload="metadata" poster={poster || ''}>
+        <source src={video} type="video/mp4">
+        Your browser does not support video.
+      </video>
+    )}
   </div>
   <h3 class="heading">{title}</h3>
   <p>{description}</p>
 </article>
+
+<style>
+  .video-wrap iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+  }
+</style>
