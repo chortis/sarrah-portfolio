@@ -5,9 +5,10 @@ export interface Props {
   video: string;
   poster?: string;
   start?: number;
+  lock?: boolean;
 }
 
-const { title, description, video, poster, start } = Astro.props;
+const { title, description, video, poster, start, lock = false } = Astro.props;
 
 // Detect YouTube URLs and convert to an embeddable form.
 function getYouTubeEmbed(url: string, startSeconds?: number): string | null {
@@ -32,7 +33,6 @@ function getYouTubeEmbed(url: string, startSeconds?: number): string | null {
 
     if (!id) return null;
 
-    // Allow `t=525` or `t=8m45s` style values.
     let startNum = startSeconds;
     if (startNum == null && urlStart) {
       const m = urlStart.match(/^(?:(\d+)h)?(?:(\d+)m)?(?:(\d+)s?)?$/);
@@ -54,10 +54,7 @@ function getYouTubeEmbed(url: string, startSeconds?: number): string | null {
 
 const youtubeEmbed = getYouTubeEmbed(video, start);
 
-// Parse timestamps in the description. A "MM:SS - MM:SS" range becomes a
-// single chip whose start time is clickable. A standalone timestamp also
-// becomes a chip and is clickable. Trailing punctuation like commas is
-// kept outside the chip so multiple chips on one line read clearly.
+// Parse timestamps in the description for clickable jumps.
 type Part =
   | { type: 'text'; value: string }
   | { type: 'ts'; value: string; seconds: number }
@@ -93,49 +90,118 @@ const descParts: Part[] = youtubeEmbed
   : [{ type: 'text', value: description }];
 ---
 
-<article class="board-card">
-  <div class="video-wrap">
-    {youtubeEmbed ? (
-      <iframe
-        src={youtubeEmbed}
-        title={title}
-        loading="lazy"
-        frameborder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-        referrerpolicy="strict-origin-when-cross-origin"
-        allowfullscreen
-      ></iframe>
-    ) : (
-      <video controls preload="metadata" poster={poster || ''}>
-        <source src={video} type="video/mp4">
-        Your browser does not support video.
-      </video>
-    )}
-  </div>
-  <h3 class="heading">{title}</h3>
-  <p>
-    {descParts.map((p) => {
-      if (p.type === 'text') return <span>{p.value}</span>;
-      if (p.type === 'ts') {
+<article class={`board-card${lock ? ' is-lockable' : ''}`} data-locked={lock ? 'true' : undefined}>
+  {lock && (
+    <div class="card-lock" aria-label="Locked content">
+      <div class="card-lock-inner">
+        <svg class="lock-icon" xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="4" y="11" width="16" height="10" rx="2"></rect>
+          <path d="M8 11V7a4 4 0 0 1 8 0v4"></path>
+        </svg>
+        <p class="card-lock-text">This piece is private. Enter the password to view.</p>
+        <form class="card-lock-form" autocomplete="off">
+          <input type="password" class="card-lock-input" placeholder="Password" required aria-label="Password" />
+          <button type="submit" class="btn btn-primary card-lock-submit">Unlock</button>
+        </form>
+        <p class="card-lock-error error" hidden>Incorrect password.</p>
+      </div>
+    </div>
+  )}
+
+  <div class="card-content" hidden={lock}>
+    <div class="video-wrap">
+      {youtubeEmbed ? (
+        <iframe
+          src={youtubeEmbed}
+          title={title}
+          loading="lazy"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerpolicy="strict-origin-when-cross-origin"
+          allowfullscreen
+        ></iframe>
+      ) : (
+        <video controls preload="metadata" poster={poster || ''}>
+          <source src={video} type="video/mp4">
+          Your browser does not support video.
+        </video>
+      )}
+    </div>
+    <h3 class="heading">{title}</h3>
+    <p>
+      {descParts.map((p) => {
+        if (p.type === 'text') return <span>{p.value}</span>;
+        if (p.type === 'ts') {
+          return (
+            <span class="ts-chip">
+              <button type="button" class="timestamp" data-seconds={p.seconds}>{p.value}</button>
+            </span>
+          );
+        }
         return (
           <span class="ts-chip">
-            <button type="button" class="timestamp" data-seconds={p.seconds}>{p.value}</button>
+            <button type="button" class="timestamp" data-seconds={p.seconds}>{p.start}</button>
+            <span class="ts-sep">–</span>
+            <span class="ts-end">{p.end}</span>
           </span>
         );
-      }
-      // range
-      return (
-        <span class="ts-chip">
-          <button type="button" class="timestamp" data-seconds={p.seconds}>{p.start}</button>
-          <span class="ts-sep">–</span>
-          <span class="ts-end">{p.end}</span>
-        </span>
-      );
-    })}
-  </p>
+      })}
+    </p>
+  </div>
 </article>
 
 <script>
+  const SESSION_KEY = 'sarrah_private_auth';
+  const PASSWORD_HASH = import.meta.env.PUBLIC_PASSWORD_HASH;
+
+  async function hashPassword(password: string): Promise<string> {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(hashBuffer))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+  }
+
+  function unlockCard(card: Element) {
+    card.removeAttribute('data-locked');
+    const overlay = card.querySelector<HTMLElement>('.card-lock');
+    const content = card.querySelector<HTMLElement>('.card-content');
+    if (overlay) overlay.hidden = true;
+    if (content) content.hidden = false;
+  }
+
+  function unlockAll() {
+    document.querySelectorAll('.board-card[data-locked="true"]').forEach(unlockCard);
+  }
+
+  // If already authenticated this session, unlock everything immediately.
+  if (sessionStorage.getItem(SESSION_KEY) === 'true') {
+    unlockAll();
+  }
+
+  // Wire up each lock form.
+  document.querySelectorAll<HTMLFormElement>('.board-card .card-lock-form').forEach((form) => {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const card = form.closest('.board-card');
+      if (!card) return;
+      const input = form.querySelector<HTMLInputElement>('.card-lock-input');
+      const error = card.querySelector<HTMLElement>('.card-lock-error');
+      if (!input) return;
+      const hash = await hashPassword(input.value);
+      if (hash === PASSWORD_HASH) {
+        sessionStorage.setItem(SESSION_KEY, 'true');
+        unlockAll();
+      } else {
+        if (error) error.hidden = false;
+        input.value = '';
+        input.focus();
+      }
+    });
+  });
+
+  // Timestamp click handlers (only meaningful once unlocked).
   document.querySelectorAll<HTMLButtonElement>('.board-card .timestamp').forEach((btn) => {
     btn.addEventListener('click', () => {
       const card = btn.closest('.board-card');
@@ -163,7 +229,76 @@ const descParts: Part[] = youtubeEmbed
     display: block;
   }
 
-  /* Chip wrapping a timestamp (or range) so each one stands out clearly */
+  /* Locked-card overlay — sized so it occupies roughly the same space as a card */
+  .board-card.is-lockable[data-locked='true'] {
+    aspect-ratio: 16 / 9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-card);
+  }
+
+  .card-lock {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem;
+  }
+
+  .card-lock-inner {
+    text-align: center;
+    max-width: 320px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .lock-icon {
+    color: var(--gold);
+  }
+
+  .card-lock-text {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin: 0;
+  }
+
+  .card-lock-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+    align-items: center;
+  }
+
+  .card-lock-input {
+    width: 100%;
+    padding: 0.55rem 0.85rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 1rem;
+    text-align: left;
+    outline: none;
+    transition: border-color var(--transition);
+  }
+
+  .card-lock-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  .card-lock-submit {
+    align-self: stretch;
+    justify-content: center;
+  }
+
+  /* Timestamp chip styles (unchanged) */
   .ts-chip {
     display: inline-flex;
     align-items: baseline;
@@ -187,10 +322,7 @@ const descParts: Part[] = youtubeEmbed
     background: var(--bg-card);
   }
 
-  .ts-sep {
-    color: var(--text-muted);
-  }
-
+  .ts-sep,
   .ts-end {
     color: var(--text-muted);
   }
