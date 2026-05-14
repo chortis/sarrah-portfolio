@@ -8,7 +8,6 @@ const portfolio = defineCollection({
     video: z.string(),
     poster: z.string().optional(),
     order: z.number(),
-    lock: z.boolean().default(false),
   }),
 });
 
@@ -20,7 +19,6 @@ const privateWork = defineCollection({
     video: z.string(),
     poster: z.string().optional(),
     order: z.number(),
-    lock: z.boolean().default(false),
   }),
 });
 
