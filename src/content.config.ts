@@ -1,7 +1,9 @@
-import { defineCollection, z } from 'astro:content';
+import { defineCollection } from 'astro:content';
+import { glob } from 'astro/loaders';
+import { z } from 'astro/zod';
 
 const portfolio = defineCollection({
-  type: 'content',
+  loader: glob({ pattern: '**/*.md', base: './src/content/portfolio' }),
   schema: z.object({
     title: z.string(),
     description: z.string(),
@@ -13,7 +15,7 @@ const portfolio = defineCollection({
 });
 
 const privateWork = defineCollection({
-  type: 'content',
+  loader: glob({ pattern: '**/*.md', base: './src/content/private' }),
   schema: z.object({
     title: z.string(),
     description: z.string(),
@@ -25,7 +27,7 @@ const privateWork = defineCollection({
 });
 
 const drawings = defineCollection({
-  type: 'content',
+  loader: glob({ pattern: '**/*.md', base: './src/content/drawings' }),
   schema: z.object({
     alt: z.string(),
     image: z.string(),
@@ -35,7 +37,7 @@ const drawings = defineCollection({
 });
 
 const privateDrawings = defineCollection({
-  type: 'content',
+  loader: glob({ pattern: '**/*.md', base: './src/content/private-drawings' }),
   schema: z.object({
     alt: z.string(),
     image: z.string(),
