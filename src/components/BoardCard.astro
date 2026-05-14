@@ -54,22 +54,37 @@ function getYouTubeEmbed(url: string, startSeconds?: number): string | null {
 
 const youtubeEmbed = getYouTubeEmbed(video, start);
 
-// Parse timestamps (M:SS or H:MM:SS) in the description and turn them into clickable parts.
+// Parse timestamps in the description and turn the FIRST timestamp of a
+// "MM:SS - MM:SS" range into a clickable button. Standalone timestamps
+// (not part of a range) are also clickable. The end timestamp of a range
+// is rendered as plain text.
 type Part = { type: 'text'; value: string } | { type: 'ts'; value: string; seconds: number };
+
+function tsToSeconds(s: string): number {
+  const parts = s.split(':').map((n) => parseInt(n, 10));
+  if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  return parts[0] * 60 + parts[1];
+}
+
 function parseTimestamps(text: string): Part[] {
   const parts: Part[] = [];
-  const re = /\b(\d{1,2}):(\d{2})(?::(\d{2}))?\b/g;
+  // Match either a range "TS - TS" (hyphen, en-dash, or em-dash, with optional spaces)
+  // or a single TS. Ranges are matched first because of alternation order.
+  const tsPattern = '\\d{1,2}:\\d{2}(?::\\d{2})?';
+  const re = new RegExp(`(${tsPattern})\\s*[-\\u2013\\u2014]\\s*(${tsPattern})|(${tsPattern})`, 'g');
   let last = 0;
   let m: RegExpExecArray | null;
   while ((m = re.exec(text)) !== null) {
     if (m.index > last) parts.push({ type: 'text', value: text.slice(last, m.index) });
-    let h = 0, min = 0, s = 0;
-    if (m[3] !== undefined) {
-      h = parseInt(m[1], 10); min = parseInt(m[2], 10); s = parseInt(m[3], 10);
-    } else {
-      min = parseInt(m[1], 10); s = parseInt(m[2], 10);
+    if (m[1] && m[2]) {
+      // Range: only the first timestamp is clickable.
+      parts.push({ type: 'ts', value: m[1], seconds: tsToSeconds(m[1]) });
+      // Preserve the original separator/whitespace and the end timestamp as text.
+      const sep = m[0].slice(m[1].length, m[0].length - m[2].length);
+      parts.push({ type: 'text', value: sep + m[2] });
+    } else if (m[3]) {
+      parts.push({ type: 'ts', value: m[3], seconds: tsToSeconds(m[3]) });
     }
-    parts.push({ type: 'ts', value: m[0], seconds: h * 3600 + min * 60 + s });
     last = m.index + m[0].length;
   }
   if (last < text.length) parts.push({ type: 'text', value: text.slice(last) });
