@@ -44,7 +44,7 @@ function getYouTubeEmbed(url: string, startSeconds?: number): string | null {
       }
     }
 
-    const params = new URLSearchParams({ rel: '0' });
+    const params = new URLSearchParams({ rel: '0', enablejsapi: '1' });
     if (startNum && startNum > 0) params.set('start', String(startNum));
     return `https://www.youtube-nocookie.com/embed/${id}?${params.toString()}`;
   } catch {
@@ -53,6 +53,30 @@ function getYouTubeEmbed(url: string, startSeconds?: number): string | null {
 }
 
 const youtubeEmbed = getYouTubeEmbed(video, start);
+
+// Parse timestamps (M:SS or H:MM:SS) in the description and turn them into clickable parts.
+type Part = { type: 'text'; value: string } | { type: 'ts'; value: string; seconds: number };
+function parseTimestamps(text: string): Part[] {
+  const parts: Part[] = [];
+  const re = /\b(\d{1,2}):(\d{2})(?::(\d{2}))?\b/g;
+  let last = 0;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(text)) !== null) {
+    if (m.index > last) parts.push({ type: 'text', value: text.slice(last, m.index) });
+    let h = 0, min = 0, s = 0;
+    if (m[3] !== undefined) {
+      h = parseInt(m[1], 10); min = parseInt(m[2], 10); s = parseInt(m[3], 10);
+    } else {
+      min = parseInt(m[1], 10); s = parseInt(m[2], 10);
+    }
+    parts.push({ type: 'ts', value: m[0], seconds: h * 3600 + min * 60 + s });
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) parts.push({ type: 'text', value: text.slice(last) });
+  return parts;
+}
+
+const descParts = youtubeEmbed ? parseTimestamps(description) : [{ type: 'text', value: description } as Part];
 ---
 
 <article class="board-card">
@@ -75,8 +99,34 @@ const youtubeEmbed = getYouTubeEmbed(video, start);
     )}
   </div>
   <h3 class="heading">{title}</h3>
-  <p>{description}</p>
+  <p>
+    {descParts.map((p) => (
+      p.type === 'ts'
+        ? <button type="button" class="timestamp" data-seconds={p.seconds}>{p.value}</button>
+        : <span>{p.value}</span>
+    ))}
+  </p>
 </article>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>('.board-card .timestamp').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const card = btn.closest('.board-card');
+      const iframe = card?.querySelector<HTMLIFrameElement>('iframe');
+      if (!iframe) return;
+      const seconds = btn.getAttribute('data-seconds');
+      if (!seconds) return;
+      try {
+        const url = new URL(iframe.src);
+        url.searchParams.set('start', seconds);
+        url.searchParams.set('autoplay', '1');
+        iframe.src = url.toString();
+      } catch (e) {
+        /* no-op */
+      }
+    });
+  });
+</script>
 
 <style>
   .video-wrap iframe {
@@ -84,5 +134,23 @@ const youtubeEmbed = getYouTubeEmbed(video, start);
     height: 100%;
     border: 0;
     display: block;
+  }
+
+  .timestamp {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    color: var(--gold);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    transition: color var(--transition);
+  }
+
+  .timestamp:hover,
+  .timestamp:focus-visible {
+    color: var(--gold-hover);
   }
 </style>
