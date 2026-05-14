@@ -54,11 +54,14 @@ function getYouTubeEmbed(url: string, startSeconds?: number): string | null {
 
 const youtubeEmbed = getYouTubeEmbed(video, start);
 
-// Parse timestamps in the description and turn the FIRST timestamp of a
-// "MM:SS - MM:SS" range into a clickable button. Standalone timestamps
-// (not part of a range) are also clickable. The end timestamp of a range
-// is rendered as plain text.
-type Part = { type: 'text'; value: string } | { type: 'ts'; value: string; seconds: number };
+// Parse timestamps in the description. A "MM:SS - MM:SS" range becomes a
+// single chip whose start time is clickable. A standalone timestamp also
+// becomes a chip and is clickable. Trailing punctuation like commas is
+// kept outside the chip so multiple chips on one line read clearly.
+type Part =
+  | { type: 'text'; value: string }
+  | { type: 'ts'; value: string; seconds: number }
+  | { type: 'range'; start: string; end: string; seconds: number };
 
 function tsToSeconds(s: string): number {
   const parts = s.split(':').map((n) => parseInt(n, 10));
@@ -68,8 +71,6 @@ function tsToSeconds(s: string): number {
 
 function parseTimestamps(text: string): Part[] {
   const parts: Part[] = [];
-  // Match either a range "TS - TS" (hyphen, en-dash, or em-dash, with optional spaces)
-  // or a single TS. Ranges are matched first because of alternation order.
   const tsPattern = '\\d{1,2}:\\d{2}(?::\\d{2})?';
   const re = new RegExp(`(${tsPattern})\\s*[-\\u2013\\u2014]\\s*(${tsPattern})|(${tsPattern})`, 'g');
   let last = 0;
@@ -77,11 +78,7 @@ function parseTimestamps(text: string): Part[] {
   while ((m = re.exec(text)) !== null) {
     if (m.index > last) parts.push({ type: 'text', value: text.slice(last, m.index) });
     if (m[1] && m[2]) {
-      // Range: only the first timestamp is clickable.
-      parts.push({ type: 'ts', value: m[1], seconds: tsToSeconds(m[1]) });
-      // Preserve the original separator/whitespace and the end timestamp as text.
-      const sep = m[0].slice(m[1].length, m[0].length - m[2].length);
-      parts.push({ type: 'text', value: sep + m[2] });
+      parts.push({ type: 'range', start: m[1], end: m[2], seconds: tsToSeconds(m[1]) });
     } else if (m[3]) {
       parts.push({ type: 'ts', value: m[3], seconds: tsToSeconds(m[3]) });
     }
@@ -91,7 +88,9 @@ function parseTimestamps(text: string): Part[] {
   return parts;
 }
 
-const descParts = youtubeEmbed ? parseTimestamps(description) : [{ type: 'text', value: description } as Part];
+const descParts: Part[] = youtubeEmbed
+  ? parseTimestamps(description)
+  : [{ type: 'text', value: description }];
 ---
 
 <article class="board-card">
@@ -115,11 +114,24 @@ const descParts = youtubeEmbed ? parseTimestamps(description) : [{ type: 'text',
   </div>
   <h3 class="heading">{title}</h3>
   <p>
-    {descParts.map((p) => (
-      p.type === 'ts'
-        ? <button type="button" class="timestamp" data-seconds={p.seconds}>{p.value}</button>
-        : <span>{p.value}</span>
-    ))}
+    {descParts.map((p) => {
+      if (p.type === 'text') return <span>{p.value}</span>;
+      if (p.type === 'ts') {
+        return (
+          <span class="ts-chip">
+            <button type="button" class="timestamp" data-seconds={p.seconds}>{p.value}</button>
+          </span>
+        );
+      }
+      // range
+      return (
+        <span class="ts-chip">
+          <button type="button" class="timestamp" data-seconds={p.seconds}>{p.start}</button>
+          <span class="ts-sep">–</span>
+          <span class="ts-end">{p.end}</span>
+        </span>
+      );
+    })}
   </p>
 </article>
 
@@ -151,6 +163,38 @@ const descParts = youtubeEmbed ? parseTimestamps(description) : [{ type: 'text',
     display: block;
   }
 
+  /* Chip wrapping a timestamp (or range) so each one stands out clearly */
+  .ts-chip {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.25rem;
+    padding: 0.1rem 0.5rem;
+    margin: 0.1rem 0.15rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--bg);
+    font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    white-space: nowrap;
+    vertical-align: baseline;
+    transition: border-color var(--transition), background var(--transition);
+  }
+
+  .ts-chip:hover,
+  .ts-chip:focus-within {
+    border-color: var(--accent);
+    background: var(--bg-card);
+  }
+
+  .ts-sep {
+    color: var(--text-muted);
+  }
+
+  .ts-end {
+    color: var(--text-muted);
+  }
+
   .timestamp {
     background: none;
     border: none;
@@ -159,13 +203,12 @@ const descParts = youtubeEmbed ? parseTimestamps(description) : [{ type: 'text',
     font: inherit;
     color: var(--gold);
     cursor: pointer;
-    text-decoration: underline;
-    text-underline-offset: 2px;
     transition: color var(--transition);
   }
 
   .timestamp:hover,
   .timestamp:focus-visible {
     color: var(--gold-hover);
+    outline: none;
   }
 </style>
