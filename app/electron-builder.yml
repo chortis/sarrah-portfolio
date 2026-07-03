@@ -1,0 +1,25 @@
+appId: com.sarrahcampbell.portfoliomanager
+productName: Sarrah Portfolio Manager
+directories:
+  output: release
+  buildResources: build
+files:
+  - out/**/*
+  - package.json
+asarUnpack:
+  # ffmpeg-static ships a native binary that must run from disk, not from asar.
+  - node_modules/ffmpeg-static/**
+win:
+  target:
+    - nsis
+  artifactName: ${productName}-${version}-setup.${ext}
+nsis:
+  oneClick: true
+  perMachine: false
+mac:
+  target:
+    - dmg
+  category: public.app-category.productivity
+  artifactName: ${productName}-${version}.${ext}
+dmg:
+  title: ${productName}
