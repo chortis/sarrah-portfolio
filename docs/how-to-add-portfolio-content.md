@@ -1,4 +1,4 @@
-# How to Add Portfolio Content (ELI5) with Copilot + Cloudinary
+# How to Add Portfolio Content with Copilot
 
 ## 1) Open the right account
 1. Open Google Chrome.
