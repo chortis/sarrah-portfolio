@@ -47,7 +47,7 @@ Sarrah never has to authenticate.
 
 2. For a local test build, create installers:
    ```bash
-   npm install
+   npm ci
    npm run package:mac    # produces a .dmg in release/
    npm run package:win    # produces a .exe installer in release/ (run on Windows)
    ```
@@ -59,7 +59,7 @@ Sarrah never has to authenticate.
 
 ```bash
 cd app
-npm install
+npm ci
 npm run dev        # launches the app with hot reload
 npm run typecheck  # type-check main + renderer
 npm run build      # bundle without packaging
