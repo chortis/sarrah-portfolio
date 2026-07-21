@@ -117,6 +117,6 @@ jobs:
         with:
           path: release-artifacts
 
-      - run: gh release create "${{ needs.version.outputs.tag }}" release-artifacts/*/* --title "Sarrah Portfolio Manager ${{ needs.version.outputs.version }}" --generate-notes
+      - run: gh release create "${{ needs.version.outputs.tag }}" release-artifacts/*/* --repo "${{ github.repository }}" --title "Sarrah Portfolio Manager ${{ needs.version.outputs.version }}" --generate-notes
         env:
           GH_TOKEN: ${{ github.token }}
