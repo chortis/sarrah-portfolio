@@ -1,0 +1,122 @@
+name: Publish Portfolio Manager
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - app/**
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-portfolio-manager
+  cancel-in-progress: false
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - id: version
+        run: |
+          latest_tag="$(git tag --list 'manager-v*' --sort=-version:refname | head -n 1)"
+          latest_version="${latest_tag#manager-v}"
+
+          VERSION="$(node - "$latest_version" <<'NODE'
+          const fs = require('node:fs');
+          const [releaseVersion] = process.argv.slice(2);
+          const sourceVersion = JSON.parse(
+            fs.readFileSync('app/package.json', 'utf8'),
+          ).version;
+
+          function parse(version) {
+            if (!/^\d+\.\d+\.\d+$/.test(version)) {
+              throw new Error(`Expected a patch version, received "${version}".`);
+            }
+
+            return version.split('.').map(Number);
+          }
+
+          function compare(left, right) {
+            for (let index = 0; index < left.length; index += 1) {
+              if (left[index] !== right[index]) {
+                return left[index] - right[index];
+              }
+            }
+
+            return 0;
+          }
+
+          const source = parse(sourceVersion);
+          const latest = releaseVersion ? parse(releaseVersion) : source;
+          const base = compare(source, latest) > 0 ? source : latest;
+
+          base[2] += 1;
+          console.log(base.join('.'));
+          NODE
+          )"
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "tag=manager-v$VERSION" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: version
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-14
+            npm-config-arch: arm64
+            package-command: npm run package:mac --prefix app -- --arm64
+            artifact-name: macos-arm64-installer
+            artifact-path: app/release/*.dmg
+          - os: windows-latest
+            npm-config-arch: x64
+            package-command: npm run package:win --prefix app -- --x64
+            artifact-name: windows-x64-installer
+            artifact-path: app/release/*.exe
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
+    env:
+      npm_config_arch: ${{ matrix.npm-config-arch }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+
+      - run: npm ci --prefix app
+
+      - run: npm version ${{ needs.version.outputs.version }} --prefix app --no-git-tag-version
+
+      - run: ${{ matrix.package-command }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: ${{ matrix.artifact-path }}
+          if-no-files-found: error
+
+  release:
+    needs: [version, build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: release-artifacts
+
+      - run: gh release create "${{ needs.version.outputs.tag }}" release-artifacts/*/* --title "Sarrah Portfolio Manager ${{ needs.version.outputs.version }}" --generate-notes
+        env:
+          GH_TOKEN: ${{ github.token }}

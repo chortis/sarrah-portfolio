@@ -17,13 +17,18 @@ It automatically:
 
 ## For Sarrah (using the app)
 
-1. Open the app.
-2. Pick a section on the left (Portfolio Videos, Client Work, Drawings, …).
-3. Click **Add**, choose a video/image (or paste a YouTube link for client work),
+1. Download the Apple Silicon macOS `.dmg` or Windows 11 `.exe` from the latest
+   [GitHub release](https://github.com/chortis/sarrah-portfolio/releases).
+2. Install and open the app.
+3. On first launch, enter the GitHub and Cloudinary credentials in **Settings**.
+   They are stored encrypted on the computer.
+4. Pick a section on the left (Portfolio Videos, Client Work, Drawings, …).
+5. Click **Add**, choose a video/image (or paste a YouTube link for client work),
    fill in the details, and click **Publish**.
-4. Your website updates automatically a few minutes later.
+6. Your website updates automatically a few minutes later.
 
-You never need to log in — it's already connected.
+> The installers are not code-signed. macOS and Windows may show a warning before
+> the first launch; use the operating system's option to open the downloaded app.
 
 ## For the person setting it up (one-time)
 
@@ -40,7 +45,7 @@ Sarrah never has to authenticate.
      write** on `chortis/sarrah-portfolio` only.
    - `.env.desktop` is gitignored — never commit it.
 
-2. Build installers:
+2. For a local test build, create installers:
    ```bash
    npm install
    npm run package:mac    # produces a .dmg in release/
@@ -60,6 +65,16 @@ npm run typecheck  # type-check main + renderer
 npm run build      # bundle without packaging
 ```
 
+## Releases
+
+Pushing a change under `app/` to `main` automatically builds the next patch
+version on native Apple Silicon macOS and Windows x64 runners, then attaches the
+`.dmg` and `.exe` installers to a GitHub release. The app bundles the matching
+ffmpeg executable outside Electron's app archive so video encoding works after
+installation. Release builds do not use `.env.desktop`, so a person installing
+the app supplies credentials through its encrypted local Settings screen when
+needed.
+
 ## How it works (technical)
 
 - **Electron** app: a Node **main process** (privileged work) + a **React/TS
@@ -75,5 +90,6 @@ npm run build      # bundle without packaging
 
 ## Security note
 
-Because credentials are baked in, **do not share the built installers publicly** —
-they are intended for Sarrah's own machines only.
+The GitHub Release installers contain no credentials. **Do not share locally built
+installers that use `.env.desktop`**, because that file bakes its credentials into
+the app.
