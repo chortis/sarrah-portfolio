@@ -7,9 +7,6 @@ export interface AppConfig {
   cloudinaryApiKey: string
   cloudinaryApiSecret: string
   githubToken: string
-  githubOwner: string
-  githubRepo: string
-  githubBranch: string
 }
 
 /** Config with secrets redacted, safe to send to the renderer. */
