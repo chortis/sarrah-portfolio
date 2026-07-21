@@ -32,34 +32,31 @@ It automatically:
 
 ## For the person setting it up (one-time)
 
-Credentials are provided **locally at setup** and baked into the built app, so
-Sarrah never has to authenticate.
+Credentials are provided **locally in the app**. The app only publishes to
+`chortis/sarrah-portfolio` on `main`, and credentials are stored with the
+operating system's encrypted credential storage.
 
-1. Copy the env template and fill in real values:
-   ```bash
-   cd app
-   cp .env.desktop.example .env.desktop
-   # edit .env.desktop with the Cloudinary keys and a GitHub token
-   ```
-   - The **GitHub token** should be a fine-grained PAT with **Contents: read &
-     write** on `chortis/sarrah-portfolio` only.
-   - `.env.desktop` is gitignored — never commit it.
+1. Open the app and enter the Cloudinary credentials and GitHub token in
+   **Settings**.
+   - The **GitHub token** must belong to `@chortis` and should be a fine-grained
+     PAT limited to **Contents: read & write** on `chortis/sarrah-portfolio`.
+   - Never share this token or a device profile that stores it.
 
 2. For a local test build, create installers:
    ```bash
-   npm install
+   npm ci
    npm run package:mac    # produces a .dmg in release/
    npm run package:win    # produces a .exe installer in release/ (run on Windows)
    ```
 
-   > If you skip `.env.desktop`, the app still works — it will show a one-time
-   > Settings screen asking for the credentials, stored encrypted on the machine.
+   > The app shows a one-time Settings screen asking for credentials, which are
+   > stored encrypted on the machine.
 
 ## Development
 
 ```bash
 cd app
-npm install
+npm ci
 npm run dev        # launches the app with hot reload
 npm run typecheck  # type-check main + renderer
 npm run build      # bundle without packaging
@@ -71,7 +68,7 @@ Pushing a change under `app/` to `main` automatically builds the next patch
 version on native Apple Silicon macOS and Windows x64 runners, then attaches the
 `.dmg` and `.exe` installers to a GitHub release. The app bundles the matching
 ffmpeg executable outside Electron's app archive so video encoding works after
-installation. Release builds do not use `.env.desktop`, so a person installing
+installation. Release builds never contain credentials, so a person installing
 the app supplies credentials through its encrypted local Settings screen when
 needed.
 
@@ -85,11 +82,10 @@ needed.
 - Publishing uses the **GitHub Git Data API** for atomic, multi-file commits
   (important for reordering). Every write re-checks the latest commit SHA first to
   avoid overwriting newer changes.
-- Credentials are read from baked build-time env **or** encrypted on disk via
-  Electron `safeStorage`; secrets never reach the renderer.
+- Credentials are stored on disk via Electron `safeStorage`; secrets never reach
+  the renderer.
 
 ## Security note
 
-The GitHub Release installers contain no credentials. **Do not share locally built
-installers that use `.env.desktop`**, because that file bakes its credentials into
-the app.
+The GitHub Release installers contain no credentials. Do not share the GitHub
+token or a user profile that stores it.

@@ -12,16 +12,16 @@ import type {
   CommitResult,
   SyncResult
 } from '../../shared/ipc'
-import { config } from './config'
+import { config, WEBSITE_TARGET } from './config'
 import { serialize } from './markdown'
 
 function client(): { octokit: Octokit; owner: string; repo: string; branch: string } {
   const c = config.load()
   return {
     octokit: new Octokit({ auth: c.githubToken }),
-    owner: c.githubOwner,
-    repo: c.githubRepo,
-    branch: c.githubBranch
+    owner: WEBSITE_TARGET.githubOwner,
+    repo: WEBSITE_TARGET.githubRepo,
+    branch: WEBSITE_TARGET.githubBranch
   }
 }
 

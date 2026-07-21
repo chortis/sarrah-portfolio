@@ -6,10 +6,7 @@ import type { AppConfig, ConnectionCheck } from '../../../shared/ipc'
 export function SettingsView({ firstRun = false }: { firstRun?: boolean }): JSX.Element {
   const { config, reloadConfig, refresh, toast } = useStore()
   const [form, setForm] = useState<Partial<AppConfig>>({
-    cloudinaryCloudName: config?.cloudinaryCloudName ?? '',
-    githubOwner: config?.githubOwner ?? 'chortis',
-    githubRepo: config?.githubRepo ?? 'sarrah-portfolio',
-    githubBranch: config?.githubBranch ?? 'main'
+    cloudinaryCloudName: config?.cloudinaryCloudName ?? ''
   })
   const [saving, setSaving] = useState(false)
   const [checking, setChecking] = useState(false)
@@ -21,8 +18,7 @@ export function SettingsView({ firstRun = false }: { firstRun?: boolean }): JSX.
   async function save(): Promise<void> {
     setSaving(true)
     try {
-      // Only send secret fields if the user typed something (avoid clobbering
-      // baked/stored values with blanks).
+      // Only send secret fields if the user typed something.
       const payload: Partial<AppConfig> = { ...form }
       for (const key of [
         'cloudinaryApiKey',
@@ -111,29 +107,10 @@ export function SettingsView({ firstRun = false }: { firstRun?: boolean }): JSX.
             onChange={(e) => set('githubToken', e.target.value)}
           />
         </label>
-        <div className="field-row">
-          <label className="field">
-            <span>Owner</span>
-            <input
-              value={form.githubOwner ?? ''}
-              onChange={(e) => set('githubOwner', e.target.value)}
-            />
-          </label>
-          <label className="field">
-            <span>Repository</span>
-            <input
-              value={form.githubRepo ?? ''}
-              onChange={(e) => set('githubRepo', e.target.value)}
-            />
-          </label>
-          <label className="field">
-            <span>Branch</span>
-            <input
-              value={form.githubBranch ?? ''}
-              onChange={(e) => set('githubBranch', e.target.value)}
-            />
-          </label>
-        </div>
+        <p>
+          This app only publishes to {config?.githubOwner}/{config?.githubRepo} on{' '}
+          {config?.githubBranch}.
+        </p>
       </section>
 
       {check && (

@@ -1,0 +1,56 @@
+name: Dependency Security
+
+on:
+  pull_request:
+    paths:
+      - package.json
+      - package-lock.json
+      - app/package.json
+      - app/package-lock.json
+      - .npmrc
+      - .nvmrc
+      - .github/workflows/dependency-security.yml
+  push:
+    branches: [main]
+    paths:
+      - package.json
+      - package-lock.json
+      - app/package.json
+      - app/package-lock.json
+      - .npmrc
+      - .nvmrc
+      - .github/workflows/dependency-security.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify ${{ matrix.project.name }} dependencies
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project:
+          - name: website
+            prefix: ""
+            lockfile: package-lock.json
+          - name: desktop manager
+            prefix: "--prefix app"
+            lockfile: app/package-lock.json
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24.13.1
+          cache: npm
+          cache-dependency-path: ${{ matrix.project.lockfile }}
+
+      # Verify downloaded packages before allowing any dependency lifecycle scripts.
+      - run: npm ci ${{ matrix.project.prefix }} --ignore-scripts
+
+      - run: npm audit signatures ${{ matrix.project.prefix }}
+
+      - run: npm audit ${{ matrix.project.prefix }} --audit-level=high
