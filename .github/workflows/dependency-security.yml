@@ -48,8 +48,9 @@ jobs:
           cache: npm
           cache-dependency-path: ${{ matrix.project.lockfile }}
 
-      - run: npm audit signatures ${{ matrix.project.prefix }} --package-lock-only
-
-      - run: npm audit ${{ matrix.project.prefix }} --package-lock-only --audit-level=high
-
+      # Verify downloaded packages before allowing any dependency lifecycle scripts.
       - run: npm ci ${{ matrix.project.prefix }} --ignore-scripts
+
+      - run: npm audit signatures ${{ matrix.project.prefix }}
+
+      - run: npm audit ${{ matrix.project.prefix }} --audit-level=high

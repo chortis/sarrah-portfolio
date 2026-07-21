@@ -24,9 +24,12 @@ jobs:
           node-version: 24.13.1
           cache: npm
 
-      - run: npm audit signatures --package-lock-only
+      # Verify downloaded packages before allowing any dependency lifecycle scripts.
+      - run: npm ci --ignore-scripts
 
-      - run: npm audit --package-lock-only --audit-level=high
+      - run: npm audit signatures
+
+      - run: npm audit --audit-level=high
 
       - run: npm ci
 
