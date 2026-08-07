@@ -1,7 +1,7 @@
 {
   "name": "sarrah-folio",
   "version": "1.0.0",
-  "description": "",
+  "description": "Sarrah Campbell portfolio website",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
