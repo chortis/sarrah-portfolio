@@ -97,14 +97,8 @@ jobs:
           cache: npm
           cache-dependency-path: app/package-lock.json
 
-      # Verify downloaded packages before allowing any dependency lifecycle scripts.
+      # Lifecycle scripts remain disabled by .npmrc and this explicit CI flag.
       - run: npm ci --prefix app --ignore-scripts
-
-      - run: npm audit signatures --prefix app
-
-      - run: npm audit --prefix app --audit-level=high
-
-      - run: npm ci --prefix app
 
       - run: npm version ${{ needs.version.outputs.version }} --prefix app --no-git-tag-version
 

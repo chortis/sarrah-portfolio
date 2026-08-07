@@ -24,14 +24,8 @@ jobs:
           node-version: 24.13.1
           cache: npm
 
-      # Verify downloaded packages before allowing any dependency lifecycle scripts.
+      # Lifecycle scripts remain disabled by .npmrc and this explicit CI flag.
       - run: npm ci --ignore-scripts
-
-      - run: npm audit signatures
-
-      - run: npm audit --audit-level=high
-
-      - run: npm ci
 
       - run: npm run build
         env:

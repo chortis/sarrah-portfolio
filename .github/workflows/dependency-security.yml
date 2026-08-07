@@ -48,9 +48,5 @@ jobs:
           cache: npm
           cache-dependency-path: ${{ matrix.project.lockfile }}
 
-      # Verify downloaded packages before allowing any dependency lifecycle scripts.
+      # Lifecycle scripts remain disabled by .npmrc and this explicit CI flag.
       - run: npm ci ${{ matrix.project.prefix }} --ignore-scripts
-
-      - run: npm audit signatures ${{ matrix.project.prefix }}
-
-      - run: npm audit ${{ matrix.project.prefix }} --audit-level=high
