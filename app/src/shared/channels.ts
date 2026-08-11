@@ -16,6 +16,8 @@ export const CH = {
   sync: 'github:sync',
   publish: 'github:publish',
   commitBatch: 'github:commitBatch',
+  deploymentStatus: 'github:deploymentStatus',
+  deploymentRetry: 'github:deploymentRetry',
 
   openExternal: 'shell:openExternal'
 } as const

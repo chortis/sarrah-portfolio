@@ -1,5 +1,6 @@
 import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron'
 import { join } from 'path'
+import { pathToFileURL } from 'url'
 import { CH } from '../shared/channels'
 import type {
   AppConfig,
@@ -19,6 +20,7 @@ import * as gh from './services/github'
 import { randomUUID } from 'crypto'
 
 let mainWindow: BrowserWindow | null = null
+let currentAppUrl = ''
 const jobs = new Map<string, ffmpegSvc.OptimizeHandle>()
 
 function createWindow(): void {
@@ -45,10 +47,20 @@ function createWindow(): void {
     return { action: 'deny' }
   })
 
+  // The preload exposes privileged APIs (commit, upload, saveConfig) to whatever
+  // document is loaded, so the window must never navigate away from the app itself.
+  // Dropping a file or link onto the window would otherwise navigate it.
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    if (url !== currentAppUrl) event.preventDefault()
+  })
+
   if (process.env.ELECTRON_RENDERER_URL) {
-    mainWindow.loadURL(process.env.ELECTRON_RENDERER_URL)
+    currentAppUrl = process.env.ELECTRON_RENDERER_URL
+    mainWindow.loadURL(currentAppUrl)
   } else {
-    mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+    const indexPath = join(__dirname, '../renderer/index.html')
+    currentAppUrl = pathToFileURL(indexPath).toString()
+    mainWindow.loadFile(indexPath)
   }
 }
 
@@ -144,6 +156,14 @@ function registerIpc(): void {
 
   ipcMain.handle(CH.commitBatch, (_e, req: BatchRequest) =>
     wrap(() => gh.commitBatch(req.changes, req.commitMessage, req.baseSha))
+  )
+
+  ipcMain.handle(CH.deploymentStatus, (_e, commitSha: string) =>
+    wrap(() => gh.deploymentStatus(commitSha))
+  )
+
+  ipcMain.handle(CH.deploymentRetry, (_e, runId: number) =>
+    wrap(() => gh.retryDeployment(runId))
   )
 
   ipcMain.handle(CH.openExternal, (_e, url: string) => shell.openExternal(url))

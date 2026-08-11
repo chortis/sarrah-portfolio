@@ -5,6 +5,7 @@ import type {
   BatchRequest,
   CommitResult,
   ConnectionCheck,
+  DeploymentStatus,
   IpcResult,
   OptimizeProgress,
   OptimizeRequest,
@@ -48,6 +49,10 @@ const api = {
   ): Promise<IpcResult<CommitResult>> => ipcRenderer.invoke(CH.publish, req),
   commitBatch: (req: BatchRequest): Promise<IpcResult<CommitResult>> =>
     ipcRenderer.invoke(CH.commitBatch, req),
+  deploymentStatus: (commitSha: string): Promise<IpcResult<DeploymentStatus>> =>
+    ipcRenderer.invoke(CH.deploymentStatus, commitSha),
+  retryDeployment: (runId: number): Promise<IpcResult<DeploymentStatus>> =>
+    ipcRenderer.invoke(CH.deploymentRetry, runId),
 
   openExternal: (url: string): Promise<void> =>
     ipcRenderer.invoke(CH.openExternal, url)

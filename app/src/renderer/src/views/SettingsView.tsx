@@ -111,6 +111,10 @@ export function SettingsView({ firstRun = false }: { firstRun?: boolean }): JSX.
           This app only publishes to {config?.githubOwner}/{config?.githubRepo} on{' '}
           {config?.githubBranch}.
         </p>
+        <p className="muted small">
+          The token needs Contents: read &amp; write and Actions: read &amp; write
+          permissions.
+        </p>
       </section>
 
       {check && (

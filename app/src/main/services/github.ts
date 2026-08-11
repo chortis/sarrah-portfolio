@@ -10,6 +10,8 @@ import {
 import type {
   BatchChange,
   CommitResult,
+  DeploymentConclusion,
+  DeploymentStatus,
   SyncResult
 } from '../../shared/ipc'
 import { config, WEBSITE_TARGET } from './config'
@@ -26,6 +28,15 @@ function client(): { octokit: Octokit; owner: string; repo: string; branch: stri
 }
 
 const CONTENT_DIRS = new Set(COLLECTION_LIST.map((c) => c.contentDir))
+const DEPLOY_WORKFLOW = 'deploy.yml'
+const ASK_CURTIS_AFTER_FAILURES = 2
+const RETRYABLE_CONCLUSIONS = new Set<DeploymentConclusion>([
+  'failure',
+  'cancelled',
+  'timed_out',
+  'action_required',
+  'startup_failure'
+])
 
 function collectionForPath(path: string): CollectionId | null {
   for (const def of COLLECTION_LIST) {
@@ -76,7 +87,111 @@ export async function sync(): Promise<SyncResult> {
     return (a.data.order ?? 0) - (b.data.order ?? 0)
   })
 
-  return { headSha, items, syncedAt: new Date().toISOString() }
+  return {
+    headSha,
+    items,
+    syncedAt: new Date().toISOString(),
+    deployment: await deploymentStatus(headSha)
+  }
+}
+
+/** Get the Pages workflow run for a commit, if GitHub has created it yet. */
+export async function deploymentStatus(commitSha: string): Promise<DeploymentStatus> {
+  try {
+    const { octokit, owner, repo, branch } = client()
+    const runs = await octokit.actions.listWorkflowRuns({
+      owner,
+      repo,
+      workflow_id: DEPLOY_WORKFLOW,
+      branch,
+      head_sha: commitSha,
+      per_page: 1
+    })
+    const run = runs.data.workflow_runs[0]
+
+    if (!run) {
+      return {
+        commitSha,
+        runId: null,
+        status: 'waiting',
+        conclusion: null,
+        htmlUrl: null,
+        updatedAt: null,
+        failedAttempts: 0,
+        needsAssistance: false,
+        canRetry: false,
+        error: null
+      }
+    }
+
+    const conclusion = run.conclusion as DeploymentConclusion | null
+    const failedAttempts =
+      run.status === 'completed' &&
+      conclusion !== null &&
+      RETRYABLE_CONCLUSIONS.has(conclusion)
+        ? (run.run_attempt ?? 1)
+        : 0
+    return {
+      commitSha,
+      runId: run.id,
+      status: run.status as DeploymentStatus['status'],
+      conclusion,
+      htmlUrl: run.html_url,
+      updatedAt: run.updated_at,
+      failedAttempts,
+      needsAssistance: failedAttempts >= ASK_CURTIS_AFTER_FAILURES,
+      canRetry:
+        run.status === 'completed' &&
+        conclusion !== null &&
+        RETRYABLE_CONCLUSIONS.has(conclusion),
+      error: null
+    }
+  } catch (err) {
+    return {
+      commitSha,
+      runId: null,
+      status: 'error',
+      conclusion: null,
+      htmlUrl: null,
+      updatedAt: null,
+      failedAttempts: 0,
+      needsAssistance: false,
+      canRetry: false,
+      error: friendly(err)
+    }
+  }
+}
+
+/** Re-run a failed Pages workflow without creating another content commit. */
+export async function retryDeployment(runId: number): Promise<DeploymentStatus> {
+  const { octokit, owner, repo, branch } = client()
+  const existing = await octokit.actions.getWorkflowRun({ owner, repo, run_id: runId })
+  const run = existing.data
+  const conclusion = run.conclusion as DeploymentConclusion | null
+
+  if (
+    run.head_branch !== branch ||
+    !run.path.startsWith(`.github/workflows/${DEPLOY_WORKFLOW}`) ||
+    run.status !== 'completed' ||
+    conclusion === null ||
+    !RETRYABLE_CONCLUSIONS.has(conclusion)
+  ) {
+    throw new Error('Only a failed Pages deployment can be retried.')
+  }
+
+  await octokit.actions.reRunWorkflow({ owner, repo, run_id: runId })
+  return {
+    commitSha: run.head_sha,
+    runId,
+    status: 'queued',
+    conclusion: null,
+    htmlUrl: run.html_url,
+    updatedAt: new Date().toISOString(),
+    failedAttempts: 0,
+    needsAssistance: false,
+    canRetry: false,
+    error: null
+  }
 }
 
 /**
@@ -163,6 +278,11 @@ export async function ping(): Promise<{ ok: boolean; message: string }> {
     const { octokit, owner, repo, branch } = client()
     await octokit.repos.get({ owner, repo })
     await octokit.git.getRef({ owner, repo, ref: `heads/${branch}` })
+    await octokit.actions.getWorkflow({
+      owner,
+      repo,
+      workflow_id: DEPLOY_WORKFLOW
+    })
     return { ok: true, message: `Connected to ${owner}/${repo} (${branch})` }
   } catch (err) {
     return { ok: false, message: friendly(err) }

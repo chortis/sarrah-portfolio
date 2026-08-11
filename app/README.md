@@ -39,7 +39,9 @@ operating system's encrypted credential storage.
 1. Open the app and enter the Cloudinary credentials and GitHub token in
    **Settings**.
    - The **GitHub token** must belong to `@chortis` and should be a fine-grained
-     PAT limited to **Contents: read & write** on `chortis/sarrah-portfolio`.
+     PAT limited to **Contents: read & write** and **Actions: read & write** on
+     `chortis/sarrah-portfolio`. Actions access lets the app show the Pages
+     deployment status and retry a failed deployment.
    - Never share this token or a device profile that stores it.
 
 2. For a local test build, create installers:
