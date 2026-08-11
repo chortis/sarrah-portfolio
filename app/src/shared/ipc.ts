@@ -102,11 +102,44 @@ export interface CommitResult {
   htmlUrl: string
 }
 
+export type DeploymentConclusion =
+  | 'success'
+  | 'failure'
+  | 'cancelled'
+  | 'skipped'
+  | 'neutral'
+  | 'timed_out'
+  | 'action_required'
+  | 'stale'
+  | 'startup_failure'
+
+export interface DeploymentStatus {
+  commitSha: string
+  runId: number | null
+  status:
+    | 'waiting'
+    | 'requested'
+    | 'pending'
+    | 'queued'
+    | 'in_progress'
+    | 'completed'
+    | 'error'
+  conclusion: DeploymentConclusion | null
+  htmlUrl: string | null
+  updatedAt: string | null
+  /** Consecutive failed attempts for this workflow run. */
+  failedAttempts: number
+  needsAssistance: boolean
+  canRetry: boolean
+  error: string | null
+}
+
 export interface SyncResult {
   /** Latest commit SHA on the target branch. */
   headSha: string
   items: ContentItem[]
   syncedAt: string
+  deployment: DeploymentStatus
 }
 
 /** Result of any operation that can fail with a friendly message. */

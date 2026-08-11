@@ -1,6 +1,10 @@
 import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
-import type { PublicConfig, SyncResult } from '../../../shared/ipc'
+import type {
+  DeploymentStatus,
+  PublicConfig,
+  SyncResult
+} from '../../../shared/ipc'
 import type { ContentItem } from '../../../shared/collections'
 import { unwrap } from './api'
 
@@ -17,7 +21,10 @@ interface StoreValue {
   sync: SyncResult | null
   loading: boolean
   syncError: string | null
+  deployment: DeploymentStatus | null
+  retryingDeployment: boolean
   refresh: () => Promise<void>
+  retryDeployment: () => Promise<void>
   reloadConfig: () => Promise<void>
   itemsFor: (collection: string) => ContentItem[]
   toasts: Toast[]
@@ -34,6 +41,8 @@ export function StoreProvider({ children }: { children: ReactNode }): ReactNode 
   const [sync, setSync] = useState<SyncResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [syncError, setSyncError] = useState<string | null>(null)
+  const [deployment, setDeployment] = useState<DeploymentStatus | null>(null)
+  const [retryingDeployment, setRetryingDeployment] = useState(false)
   const [toasts, setToasts] = useState<Toast[]>([])
 
   const toast = useCallback((t: Omit<Toast, 'id'>) => {
@@ -58,12 +67,60 @@ export function StoreProvider({ children }: { children: ReactNode }): ReactNode 
     try {
       const result = await unwrap(window.api.sync())
       setSync(result)
+      setDeployment(result.deployment)
     } catch (err) {
       setSyncError(err instanceof Error ? err.message : String(err))
     } finally {
       setLoading(false)
     }
   }, [])
+
+  useEffect(() => {
+    if (
+      !deployment ||
+      deployment.status === 'completed' ||
+      deployment.status === 'error' ||
+      !sync ||
+      deployment.commitSha !== sync.headSha
+    ) {
+      return
+    }
+
+    const timer = window.setInterval(() => {
+      void unwrap(window.api.deploymentStatus(sync.headSha))
+        .then(setDeployment)
+        .catch((err) => {
+          setDeployment((current) =>
+            current
+              ? {
+                  ...current,
+                  status: 'error',
+                  error: err instanceof Error ? err.message : String(err)
+                }
+              : current
+          )
+        })
+    }, 5000)
+    return () => window.clearInterval(timer)
+  }, [deployment, sync])
+
+  const retryDeployment = useCallback(async () => {
+    if (!deployment?.runId || !deployment.canRetry) return
+    setRetryingDeployment(true)
+    try {
+      setDeployment(await unwrap(window.api.retryDeployment(deployment.runId)))
+      toast({ kind: 'info', message: 'Live site update restarted.' })
+    } catch (err) {
+      toast({
+        kind: 'error',
+        message: `Could not retry the live site update: ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      })
+    } finally {
+      setRetryingDeployment(false)
+    }
+  }, [deployment, toast])
 
   // On open: load config, then auto-fetch latest content if configured.
   useEffect(() => {
@@ -85,7 +142,10 @@ export function StoreProvider({ children }: { children: ReactNode }): ReactNode 
     sync,
     loading,
     syncError,
+    deployment,
+    retryingDeployment,
     refresh,
+    retryDeployment,
     reloadConfig,
     itemsFor,
     toasts,
